@@ -19,7 +19,9 @@ app.get('/', async (req, res) => {
         const createBackgroundMosaic = req.query.createBackgroundMosaic === 'true';
         const useRandomOpacity = req.query.useRandomOpacity === 'true';
         const useWall = req.query.useWall === 'true';
-        const wallType = req.query.wallType;
+        const wallType = process.env.ALLOW_CHANGE_WALL === 'true' ? req.query.wallType : '';
+
+        console.log(wallType)
 
         const base = await paint({
             inspiration,

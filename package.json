@@ -1,0 +1,27 @@
+{
+  "name": "@algopainter/ms-algopainter-gwei",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/algopainter/ms-algopainter-gwei.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/algopainter/ms-algopainter-gwei/issues"
+  },
+  "homepage": "https://github.com/algopainter/ms-algopainter-gwei#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "jimp": "^0.16.1",
+    "seedrandom": "^3.0.5"
+  }
+}

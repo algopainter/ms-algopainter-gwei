@@ -65,10 +65,9 @@ module.exports = async ({
     }
     const finalWidth = size * 14;
     const finalHeight = size * 14;
+    const final = new Jimp(finalWidth, finalHeight, 'white');
 
     if (useWall) {
-        const final = new Jimp(finalWidth, finalHeight, 'white');
-
         let background = null;
         
         if (wallType === 'silver') {
@@ -80,10 +79,7 @@ module.exports = async ({
         }
         final.composite(background, 0, 0);
         final.composite(base, 152, 153);
-        return final;
     } else {
-        const final = new Jimp(finalWidth, finalHeight, 'white');
-    
         const background = base.clone();
         background.resize(finalWidth, finalHeight);
         background.gaussian(5);
@@ -150,7 +146,10 @@ module.exports = async ({
         const rec = await Jimp.read(`./inspirations/rec.png`);
         final.composite(final2, size * 3, size * 3);
         final.composite(rec, size * 3 - 4, size * 3);
-    
-        return final;
     }
+
+    const signature = await new Jimp.read('./inspirations/signature.png');
+    final.composite(signature, 0, 0);
+    
+    return final;
 }

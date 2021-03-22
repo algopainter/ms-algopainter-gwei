@@ -21,8 +21,6 @@ app.get('/', async (req, res) => {
         const useWall = req.query.useWall === 'true';
         const wallType = process.env.ALLOW_CHANGE_WALL === 'true' ? req.query.wallType : '';
 
-        console.log(wallType)
-
         const base = await paint({
             inspiration,
             text,

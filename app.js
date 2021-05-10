@@ -2,6 +2,8 @@ const express = require('express');
 const Jimp = require('jimp');
 const paint = require('./paint');
 const cors = require('cors');
+const sha256 = require('js-sha256');
+const fs = require('fs');
 
 const app = express();
 app.use(cors()); 
@@ -12,37 +14,46 @@ app.get('/', async (req, res) => {
     try {
         res.setHeader('Content-Type', 'image/png');
 
-        const inspiration = req.query.inspiration || '1';
+        const inspiration = req.query.inspiration;
         const text = req.query.text;
         const useRandom = req.query.useRandom === 'true';
         const probability = parseFloat(req.query.probability);
-        const createBackgroundMosaic = req.query.createBackgroundMosaic === 'true';
+        const backgroundGaussian = parseInt(req.query.backgroundGaussian);
         const useRandomOpacity = req.query.useRandomOpacity === 'true';
-        const useWall = req.query.useWall === 'true';
-        const wallType = process.env.ALLOW_CHANGE_WALL === 'true' ? req.query.wallType : '';
+        const wallType = req.query.wallType;
 
-        const base = await paint({
-            inspiration,
-            text,
-            useRandom,
-            probability,
-            createBackgroundMosaic,
-            useRandomOpacity,
-            useWall,
-            wallType,
-        });
+        const hash = sha256(`${inspiration}-${text}-${useRandom}-${probability}-${wallType}`);
 
-        const buffer = await new Promise((resolve, reject) => {
-            base.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
-                if (err) {
-                    reject(err);
-                }
-
-                resolve(buffer);
+        const outputPath = __dirname + `/output/${hash}.png`;
+            
+        if (fs.existsSync(outputPath)) {
+            console.log(`Sending a cached file: ${outputPath}`);
+            res.sendFile(outputPath);
+        } else {
+            const base = await paint({
+                inspiration,
+                text,
+                useRandom,
+                probability,
+                backgroundGaussian,
+                useRandomOpacity,
+                wallType
             });
-        });
 
-        res.end(buffer);
+            base.write(outputPath);
+
+            const buffer = await new Promise((resolve, reject) => {
+                base.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
+                    if (err) {
+                        reject(err);
+                    }
+
+                    resolve(buffer);
+                });
+            });
+
+            res.end(buffer);
+        }
     } catch (e) {
         console.log(e);
         res.send({ e });

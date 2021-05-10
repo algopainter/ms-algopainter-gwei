@@ -14,6 +14,8 @@ app.get('/', async (req, res) => {
     try {
         res.setHeader('Content-Type', 'image/png');
 
+        const width = parseInt(req.query.width);
+        const height = parseInt(req.query.height);
         const inspiration = req.query.inspiration;
         const text = req.query.text;
         const useRandom = req.query.useRandom === 'true';
@@ -28,7 +30,25 @@ app.get('/', async (req, res) => {
             
         if (fs.existsSync(outputPath)) {
             console.log(`Sending a cached file: ${outputPath}`);
-            res.sendFile(outputPath);
+            
+            const newBase = await new Jimp.read(outputPath);
+
+            if (width && height) {
+                console.log(`Resizing to ${width}x${height}`)
+                newBase.resize(width, height);
+            }
+
+            const buffer = await new Promise((resolve, reject) => {
+                newBase.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
+                    if (err) {
+                        reject(err);
+                    }
+
+                    resolve(buffer);
+                });
+            });
+
+            res.end(buffer);
         } else {
             const base = await paint({
                 inspiration,
@@ -42,8 +62,15 @@ app.get('/', async (req, res) => {
 
             base.write(outputPath);
 
+            const newBase = base.clone();
+
+            if (width && height) {
+                console.log(`Resizing to ${width}x${height}`)
+                newBase.resize(width, height);
+            }
+
             const buffer = await new Promise((resolve, reject) => {
-                base.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
+                newBase.getBuffer(Jimp.MIME_PNG, (err, buffer) => {
                     if (err) {
                         reject(err);
                     }

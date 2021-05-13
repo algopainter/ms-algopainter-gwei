@@ -81,7 +81,7 @@ module.exports = async ({
         base.greyscale();
     }
 
-    if (overlay) {
+    if (overlay > 0) {
         console.log(`Using overlay ${overlay}`);
         const overlayLayer = await Jimp.read(`./overlays/overlay-${overlay}.png`);
         overlayLayer.resize(width, height);

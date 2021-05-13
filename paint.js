@@ -8,8 +8,9 @@ module.exports = async ({
     useRandom,
     probability,
     useRandomOpacity,
-    onlyMainPainting,
     wallType,
+    overlay,
+    overlayOpacity,
 }) => {
     const size = 190;
 
@@ -80,6 +81,17 @@ module.exports = async ({
         base.greyscale();
     }
 
+    if (overlay) {
+        console.log(`Using overlay ${overlay}`);
+        const overlayLayer = await Jimp.read(`./overlays/overlay-${overlay}.png`);
+        overlayLayer.resize(width, height);
+        base.composite(overlayLayer, 0, 0, {
+            mode: Jimp.BLEND_EXCLUSION,
+            opacityDest: 1,
+            opacitySource: overlayOpacity
+         });
+    }
+    
     const signature = await Jimp.read(`./inspirations/gwei-signature.png`);
     base.composite(signature, 1180, 1220);
 

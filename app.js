@@ -9,6 +9,7 @@ const app = express();
 app.use(cors()); 
 
 const port = process.env.PORT || 3000;
+const ignoreCache = process.env.IGNORE_CACHE === 'true';
 
 app.get('/', async (req, res) => {
     try {
@@ -23,8 +24,16 @@ app.get('/', async (req, res) => {
         const backgroundGaussian = parseInt(req.query.backgroundGaussian);
         const useRandomOpacity = req.query.useRandomOpacity === 'true';
         const wallType = req.query.wallType;
+        const overlay = req.query.overlay;
+        const overlayOpacity = parseFloat(req.query.overlayOpacity);
 
-        const hash = sha256(`${inspiration}-${text}-${useRandom}-${probability}-${wallType}`);
+        let params = `${inspiration}-${text}-${useRandom}-${probability}-${wallType}`;
+
+        if (overlay && overlay !== "0") {
+            params += `-${overlay}-${overlayOpacity}`;
+        }
+
+        const hash = sha256(params);
 
         const outputPath = __dirname + `/output/${hash}.png`;
             
@@ -57,10 +66,14 @@ app.get('/', async (req, res) => {
                 probability,
                 backgroundGaussian,
                 useRandomOpacity,
-                wallType
+                wallType,
+                overlay,
+                overlayOpacity,
             });
 
-            base.write(outputPath);
+            if (!ignoreCache) {
+                base.write(outputPath);
+            }
 
             const newBase = base.clone();
 
